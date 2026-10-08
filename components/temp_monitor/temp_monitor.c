@@ -71,8 +71,11 @@ esp_err_t temp_monitor_start(const temp_monitor_config_t *cfg)
     }
 
     esp_err_t err = ds18b20_init(cfg->gpio_num);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Sensor init failed: %s (check wiring / pull-up)", esp_err_to_name(err));
+    if (err == ESP_ERR_NOT_FOUND) {
+        /* Not fatal: keep running so the keypad/LEDs/LCD still work; the sensor task retries. */
+        ESP_LOGW(TAG, "No sensor presence pulse at start-up (check wiring / 4.7k pull-up); will keep retrying");
+    } else if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Sensor GPIO init failed: %s", esp_err_to_name(err));
         return err;
     }
 

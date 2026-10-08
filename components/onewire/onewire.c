@@ -1,8 +1,22 @@
-
 #include "onewire.h"
 #include "esp_rom_sys.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+
+/* Standard-speed 1-Wire slot timings in microseconds (same values as the Arduino
+ * OneWire library, which the Wokwi DS18B20 model is known to work with). */
+#define T_RESET_LOW      480
+#define T_RESET_SAMPLE    70
+#define T_RESET_END      410
+
+#define T_WRITE1_LOW      10
+#define T_WRITE1_HIGH     55
+#define T_WRITE0_LOW      65
+#define T_WRITE0_HIGH      5
+
+#define T_READ_LOW         3
+#define T_READ_SAMPLE     10   /* sample ~13 us after the falling edge (limit is 15 us) */
+#define T_READ_END        53
 
 static gpio_num_t s_pin = GPIO_NUM_NC;
 static portMUX_TYPE s_mux = portMUX_INITIALIZER_UNLOCKED;
@@ -20,6 +34,7 @@ esp_err_t ow_init(gpio_num_t pin)
     esp_err_t err = gpio_config(&io);
     if (err == ESP_OK) {
         gpio_set_level(s_pin, 1);
+        esp_rom_delay_us(T_RESET_END);   /* let the pull-up settle before the first reset */
     }
     return err;
 }
@@ -30,13 +45,13 @@ bool ow_reset(void)
 
     taskENTER_CRITICAL(&s_mux);
     gpio_set_level(s_pin, 0);
-    esp_rom_delay_us(480);
+    esp_rom_delay_us(T_RESET_LOW);
     gpio_set_level(s_pin, 1);
-    esp_rom_delay_us(70);
+    esp_rom_delay_us(T_RESET_SAMPLE);
     present = (gpio_get_level(s_pin) == 0);
     taskEXIT_CRITICAL(&s_mux);
 
-    esp_rom_delay_us(410);
+    esp_rom_delay_us(T_RESET_END);
     return present;
 }
 
@@ -45,13 +60,13 @@ static void write_bit(int bit)
     taskENTER_CRITICAL(&s_mux);
     gpio_set_level(s_pin, 0);
     if (bit) {
-        esp_rom_delay_us(6);
+        esp_rom_delay_us(T_WRITE1_LOW);
         gpio_set_level(s_pin, 1);
-        esp_rom_delay_us(64);
+        esp_rom_delay_us(T_WRITE1_HIGH);
     } else {
-        esp_rom_delay_us(60);
+        esp_rom_delay_us(T_WRITE0_LOW);
         gpio_set_level(s_pin, 1);
-        esp_rom_delay_us(10);
+        esp_rom_delay_us(T_WRITE0_HIGH);
     }
     taskEXIT_CRITICAL(&s_mux);
 }
@@ -62,11 +77,11 @@ static int read_bit(void)
 
     taskENTER_CRITICAL(&s_mux);
     gpio_set_level(s_pin, 0);
-    esp_rom_delay_us(2);
+    esp_rom_delay_us(T_READ_LOW);
     gpio_set_level(s_pin, 1);
-    esp_rom_delay_us(9);
+    esp_rom_delay_us(T_READ_SAMPLE);
     bit = gpio_get_level(s_pin);
-    esp_rom_delay_us(55);
+    esp_rom_delay_us(T_READ_END);
     taskEXIT_CRITICAL(&s_mux);
 
     return bit;

@@ -10,7 +10,7 @@
 #define TAG "main"
 
 #define SENSOR_GPIO       4
-#define SAMPLE_PERIOD_MS  2000
+#define SAMPLE_PERIOD_MS  1000
 
 #define LCD_SDA_GPIO      21
 #define LCD_SCL_GPIO      22
@@ -36,7 +36,7 @@ void app_main(void)
     };
     if (temp_monitor_start(&tcfg) != ESP_OK) {
         ESP_LOGE(TAG, "Failed to start temperature monitor");
-        lcd_print_line(0, "Sensor error");
+        lcd_print_line(0, "Monitor failed");
         return;
     }
 

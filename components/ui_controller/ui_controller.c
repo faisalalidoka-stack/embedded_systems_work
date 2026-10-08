@@ -5,12 +5,22 @@
 #include "temp_monitor.h"
 #include "freertos/task.h"
 
-#define REFRESH_MS       1000
+#define REFRESH_MS        500
 #define LED_ON_MS        3000
 #define LED_OFF_MSG_MS   1500
 #define LCD_DEGREE_CHAR  0xDF
 
 static ui_config_t s_cfg;
+
+static const char *error_text(esp_err_t err)
+{
+    switch (err) {
+    case ESP_ERR_NOT_FOUND:        return "No sensor reply";
+    case ESP_ERR_INVALID_CRC:      return "CRC error";
+    case ESP_ERR_INVALID_RESPONSE: return "Bus: no data";
+    default:                       return "Read failed";
+    }
+}
 
 static void show_temperature(void)
 {
@@ -24,8 +34,8 @@ static void show_temperature(void)
     }
 
     if (s.status != ESP_OK) {
-        lcd_print_line(0, "Temperature:");
-        lcd_print_line(1, "Sensor error");
+        lcd_print_line(0, "Sensor error");
+        lcd_print_line(1, error_text(s.status));
         return;
     }
 
