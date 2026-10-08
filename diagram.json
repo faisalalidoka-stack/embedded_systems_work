@@ -12,16 +12,71 @@
       "left": 105.6,
       "rotate": 90,
       "attrs": { "value": "4700" }
+    },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd1",
+      "top": -310.4,
+      "left": 120.8,
+      "attrs": { "pins": "i2c" }
+    },
+    {
+      "type": "wokwi-membrane-keypad",
+      "id": "keypad1",
+      "top": -203.6,
+      "left": 331.2,
+      "attrs": {}
+    },
+    { "type": "wokwi-led", "id": "led1", "top": 150, "left": 220, "attrs": { "color": "blue" } },
+    { "type": "wokwi-led", "id": "led2", "top": 150, "left": 300, "attrs": { "color": "red" } },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": 224.2,
+      "left": 210,
+      "rotate": 90,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r3",
+      "top": 224.2,
+      "left": 290,
+      "rotate": 90,
+      "attrs": { "value": "220" }
     }
   ],
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
     [ "esp:RX", "$serialMonitor:TX", "", [] ],
+
     [ "temp1:GND", "esp:GND.1", "black", [ "v0" ] ],
     [ "temp1:VCC", "esp:3V3", "red", [ "v0" ] ],
     [ "temp1:DQ", "esp:4", "green", [ "v0" ] ],
     [ "r1:1", "temp1:VCC", "red", [ "h0" ] ],
-    [ "r1:2", "temp1:DQ", "green", [ "h0" ] ]
+    [ "r1:2", "temp1:DQ", "green", [ "h0" ] ],
+
+    [ "lcd1:GND", "esp:GND.2", "black", [ "h0" ] ],
+    [ "lcd1:VCC", "esp:5V", "red", [ "h0" ] ],
+    [ "lcd1:SDA", "esp:21", "green", [ "h0" ] ],
+    [ "lcd1:SCL", "esp:22", "purple", [ "h0" ] ],
+
+    [ "keypad1:R1", "esp:19", "orange", [ "v0" ] ],
+    [ "keypad1:R2", "esp:18", "orange", [ "v0" ] ],
+    [ "keypad1:R3", "esp:5", "orange", [ "v0" ] ],
+    [ "keypad1:R4", "esp:17", "orange", [ "v0" ] ],
+    [ "keypad1:C1", "esp:32", "gold", [ "v0" ] ],
+    [ "keypad1:C2", "esp:33", "gold", [ "v0" ] ],
+    [ "keypad1:C3", "esp:25", "gold", [ "v0" ] ],
+    [ "keypad1:C4", "esp:26", "gold", [ "v0" ] ],
+
+    [ "esp:23", "r2:1", "blue", [ "v0" ] ],
+    [ "r2:2", "led1:A", "blue", [ "h0" ] ],
+    [ "led1:C", "esp:GND.3", "black", [ "v0" ] ],
+
+    [ "esp:27", "r3:1", "red", [ "v0" ] ],
+    [ "r3:2", "led2:A", "red", [ "h0" ] ],
+    [ "led2:C", "esp:GND.3", "black", [ "v0" ] ]
   ],
   "dependencies": {}
 }
